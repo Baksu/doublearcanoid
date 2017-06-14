@@ -1,0 +1,1 @@
+BGCOLOR = (0,0,0) #black
