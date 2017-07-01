@@ -15,8 +15,11 @@ MAX_BALL_Y = mainGame.PLAYGROUND_HEIGHT - BALL_DIAMETER
 UP_PLAYER = 1
 DOWN_PLAYER = 0
 
+POINTS_FOR_HIT_GROUND = -100
+
 class Player:
     def __init__(self, screen,  paddle_y_position, player_position):
+        self.paddle_y_position = paddle_y_position
         self.player_position = player_position
         self.screen = screen
         self.paddle = pygame.Rect(300, paddle_y_position, PADDLE_WIDTH, PADDLE_HEIGHT)
@@ -40,7 +43,6 @@ class Player:
 
     def play_game(self):
         self.move_ball()
-        # self.collisions()
 
     def move_ball(self):
         self.ball.left += self.ball_vel[0]
@@ -55,7 +57,10 @@ class Player:
 
         if self.ball.top < 0:
             self.ball.top = 0
-            self.ball_vel[1] = -self.ball_vel[1]
+            self.switch_ball_vertical()
+        elif self.ball.bottom > mainGame.PLAYGROUND_HEIGHT:
+            self.ball.bottom = mainGame.PLAYGROUND_HEIGHT
+            self.switch_ball_vertical()
 
     def move_ball_on_paddle(self):
         self.ball.left = self.paddle.left + self.paddle.width / 2
@@ -74,3 +79,27 @@ class Player:
 
     def draw_ball(self):
         pygame.draw.circle(self.screen, self.player_color, (self.ball.left + BALL_RADIUS, self.ball.top + BALL_RADIUS), BALL_RADIUS)
+
+    def get_ball(self):
+        return self.ball
+
+    def add_score(self, points):
+        self.score += points
+
+    def switch_ball_vertical(self):
+        self.ball_vel[1] = -self.ball_vel[1]
+
+    def check_ball_paddle_collision(self):
+        if self.ball.colliderect(self.paddle):
+            if self.player_position == DOWN_PLAYER:
+                self.ball.top = self.paddle_y_position - BALL_DIAMETER
+            else:
+                self.ball.top = self.paddle_y_position + PADDLE_HEIGHT
+            self.switch_ball_vertical()
+
+    def check_ball_ground_collision(self):
+        if self.ball.top > self.paddle.top:
+            self.ball_hit_ground()
+
+    def ball_hit_ground(self):
+        self.add_score(POINTS_FOR_HIT_GROUND)

@@ -14,6 +14,8 @@ PLAYGROUND_HEIGHT = 1000
 BRICK_WIDTH = 60
 BRICK_HEIGHT = 15
 
+POINTS_FOR_BRICK = 10
+
 S_BALLS_ON_PADDLE = 0
 S_PLAY = 1
 S_WON = 2
@@ -90,26 +92,17 @@ class Main:
         #     self.create_game()
 
     #
-    # def collisions(self):
-    #     for brick in self.bricks:
-    #         if self.ball.colliderect(brick):
-    #             self.score += 3
-    #             self.ball_vel[1] = -self.ball_vel[1]
-    #             self.bricks.remove(brick)
-    #             break
-    #
-    #     if len(self.bricks) == 0:
-    #         self.state = S_WON
-    #
-    #     if self.ball.colliderect(self.paddle):
-    #         self.ball.top = DOWN_PADDLE_Y - BALL_DIAMETER
-    #         self.ball_vel[1] = -self.ball_vel[1]
-    #     elif self.ball.top > self.paddle.top:
-    #         self.lives -= 1
-    #         if self.lives > 0:
-    #             self.state = S_BALL_ON_PADDLE
-    #         else:
-    #             self.state = S_END_GAME
+    def check_collisions(self, player):
+        ball = player.get_ball()
+        for brick in self.bricks:
+            if ball.colliderect(brick):
+                player.add_score(POINTS_FOR_BRICK)
+                player.switch_ball_vertical()
+                self.bricks.remove(brick)
+                break
+        player.check_ball_paddle_collision()
+        player.check_ball_ground_collision()
+
     #
     # def show_stats(self):
     #     if self.font:
@@ -134,6 +127,11 @@ class Main:
             self.clock.tick(50)
             self.draw_playground()
             self.check_input()
+            self.check_collisions(self.player_up)
+            self.check_collisions(self.player_down)
+
+            # if len(self.bricks) == 0:  ADD END GAME
+            #     self.state = S_WON
 
             if self.state == S_PLAY:
                 self.player_up.play_game()
